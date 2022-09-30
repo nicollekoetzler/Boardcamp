@@ -1,15 +1,25 @@
-import express from 'express';
+import express , { json } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
+import categoriesRouter from './routers/categoriesRouter.js'
+// import customersRouter from './routers/customersRouter.js'
+// import gamesRouter from './routers/gamesRouter.js'
+// import rentalsRouter from './routers/rentalsRouter.js'
+
 dotenv.config();
 
-const app = express();
+const server = express();
 
-app.use(cors());
-app.use(json());
+server.use(cors());
+server.use(json());
 
-app.listen(process.env.PORT, () => {
+server.use(categoriesRouter);
+// server.use(customersRouter);
+// server.use(gamesRouter);
+// server.use(rentalsRouter);
+
+server.listen(process.env.PORT, () => {
     console.log("server running on port " + process.env.PORT);
 }
 );
