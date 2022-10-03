@@ -20,7 +20,6 @@ export async function createCategories (req, res) {
             name: joi.string().required()
         });
 
-
         const isBodyValid = categorySchema.validate(category);
         
         if ( isBodyValid.error ){
@@ -28,8 +27,6 @@ export async function createCategories (req, res) {
         }
 
         const isNameExistent = await connection.query('SELECT name FROM categories WHERE name = $1;', [ category.name ]);
-
-        console.log(isNameExistent.rowCount)
 
         if(isNameExistent.rowCount > 0){
             return res.status(409).send("Já existe uma categoria com esse nome."); //conflict
