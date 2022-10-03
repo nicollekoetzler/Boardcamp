@@ -26,21 +26,22 @@ export async function getGames (req, res) {
 }
 
 export async function createGames (req, res) {
+
+    const game = req.body;
+
+    const gameSchema = joi.object({
+        name: joi.string().required(),
+        image: joi.string().required(),
+        stockTotal: joi.string().required(),
+        categoryId: joi.number().required(),
+        pricePerDay: joi.string().required(),
+    });
+    
     try{
-        const game = req.body;
-
-        const gameSchema = joi.object({
-            name: joi.string().required(),
-            image: joi.string().required(),
-            stockTotal: joi.string().required(),
-            categoryId: joi.number().required(),
-            pricePerDay: joi.string().required(),
-        });
-
         const isBodyValid = gameSchema.validate(game);
         
         if ( isBodyValid.error ){
-            return res.sendStatus(422); // unprocessable entity
+            return res.sendStatus(400); // bad request
         }
         
         const isIdExistent = await connection.query('SELECT id FROM categories WHERE id = $1;', [ game.categoryId ] );

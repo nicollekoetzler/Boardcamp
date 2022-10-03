@@ -13,17 +13,18 @@ export async function getCategories (req, res) {
 }
 
 export async function createCategories (req, res) {
+
+    const category = req.body;
+
+    const categorySchema = joi.object({
+        name: joi.string().required()
+    });
+
     try {
-        const category = req.body;
-
-        const categorySchema = joi.object({
-            name: joi.string().required()
-        });
-
         const isBodyValid = categorySchema.validate(category);
         
         if ( isBodyValid.error ){
-            return res.sendStatus(422);
+            return res.sendStatus(400); // bad request
         }
 
         const isNameExistent = await connection.query('SELECT name FROM categories WHERE name = $1;', [ category.name ]);
