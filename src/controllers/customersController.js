@@ -2,6 +2,7 @@ import connection from "../databases/database.js"
 import joi from 'joi';
 
 export async function getCustomers (req, res) {
+
     try {
         const {rows: customers} = await connection.query('SELECT * FROM customers;');
 
@@ -17,6 +18,7 @@ export async function getCustomers (req, res) {
 }
 
 export async function getCustomerId (req, res) {
+
     const { id } = req.params;
 
     try{
