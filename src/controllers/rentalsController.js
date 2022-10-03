@@ -3,7 +3,7 @@ import joi from 'joi';
 
 export async function getRentals (req, res) {
 
-    const {customerId, gameId} = req.query;
+    const { customerId, gameId } = req.query;
 
     try{
 
@@ -41,7 +41,42 @@ export async function getRentals (req, res) {
 }
 
 export async function createRental (req, res){
+    try{
+        const { customerId, gameId, daysRented } = req.body;
+
+        const isCustomerIdExistent = await connection.query('SELECT * FROM customers WHERE id = $1;', [ customerId ] );
+        
+        if(isCustomerIdExistent.rowCount === 0){
+            res.status(400).send("Cliente não encontrado");
+        }
+
+        const isGameIdExistent = await connection.query('SELECT * FROM games WHERE id = $1;', [ gameId ] );
+        
+        if(isGameIdExistent.rowCount === 0){
+            res.status(400).send("Jogo não encontrado");
+        }
+
+        const isGameAvaliable = await connection.query('SELECT "stockTotal" FROM games WHERE id = $1;', [ gameId ] );
+        
+        if(isGameAvaliable.rows[0].stockTotal === 0){
+            res.status(400).send("Jogo não disponível");
+        }
+
+        const rentDate = new Date()
+        const pricePerDay = await connection.query(`SELECT "pricePerDay" FROM games WHERE id=$1`,[gameId])
+        const originalPrice = (pricePerDay.rows[0].pricePerDay)*daysRented;   
+        await connection.query(`
+            INSERT INTO rentals ("customerId","gameId","rentDate","daysRented","returnDate","originalPrice","delayFee") 
+            VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+            [customerId, gameId,rentDate, daysRented, null, originalPrice, null]
+        )
     
+        res.sendStatus(201);
+
+    }catch(err){
+        console.log(err);
+        res.sendStatus(500);
+    }
 }
 
 export async function concludeRental (req, res) {
@@ -50,4 +85,21 @@ export async function concludeRental (req, res) {
 
 export async function deleteRental (req, res) {
 
+    const { id } = req.params;
+
+    try{
+        
+        const rentalId = await connection.query('SELECT * FROM rentals WHERE id = $1', [ id ] )
+
+        if (rentalId.rows.length === 0 || rentalId.rows[0].returnDate !== null){
+            res.status(400).send("Aluguel finalizado ou inexistente")
+        }
+
+        await connection.query('DELETE FROM rentals WHERE id = $1', [ id ] )
+        res.sendStatus(200);
+
+    }catch(err){
+        console.log(err);
+        res.sendStatus(500);
+    }
 }
