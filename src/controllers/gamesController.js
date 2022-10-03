@@ -57,6 +57,12 @@ export async function createGames (req, res) {
 
         // TODO: stockTotal e pricePerDay devem ser maiores que 0; 
 
+        // const stockTotal = await connection.query('SELECT "stockTotal" FROM games WHERE stockTotal = $1;', [ game.stockTotal ] );
+
+        // if(Number(stockTotal) < 1){
+        //     return res.status(409).send("batatinha");
+        // }
+
         await connection.query('INSERT INTO games (name, image, "stockTotal", "categoryId", "pricePerDay") VALUES ($1, $2, $3, $4, $5);', [ game.name, game.image, game.stockTotal, game.categoryId, game.pricePerDay ] );
         res.sendStatus(201); //created
     }catch(err){

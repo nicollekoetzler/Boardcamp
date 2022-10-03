@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 
 import categoriesRouter from './routers/categoriesRouter.js'
 import gamesRouter from './routers/gamesRouter.js'
-// import customersRouter from './routers/customersRouter.js'
+import customersRouter from './routers/customersRouter.js'
 // import rentalsRouter from './routers/rentalsRouter.js'
 
 dotenv.config();
@@ -16,7 +16,7 @@ server.use(json());
 
 server.use(categoriesRouter);
 server.use(gamesRouter);
-// server.use(customersRouter);
+server.use(customersRouter);
 // server.use(rentalsRouter);
 
 server.listen(process.env.PORT, () => {
