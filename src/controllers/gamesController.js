@@ -56,13 +56,13 @@ export async function createGames (req, res) {
             return res.status(409).send("Já existe um jogo com esse nome."); //conflict
         }
 
-        // TODO: stockTotal e pricePerDay devem ser maiores que 0; 
+        if(Number(game.stockTotal) < 1){
+            return res.status(400).send("Quantidade do produto em estoque não pode ser 0");
+        }
 
-        // const stockTotal = await connection.query('SELECT "stockTotal" FROM games WHERE stockTotal = $1;', [ game.stockTotal ] );
-
-        // if(Number(stockTotal) < 1){
-        //     return res.status(409).send("batatinha");
-        // }
+        if(Number(game.pricePerDay) < 1){
+            return res.status(400).send("Valor da diária não pode ser 0");
+        }
 
         await connection.query('INSERT INTO games (name, image, "stockTotal", "categoryId", "pricePerDay") VALUES ($1, $2, $3, $4, $5);', [ game.name, game.image, game.stockTotal, game.categoryId, game.pricePerDay ] );
         res.sendStatus(201); //created

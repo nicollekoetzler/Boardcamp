@@ -34,8 +34,13 @@ export async function createCustomer (req, res) {
             return res.sendStatus(400); // bad request
         }
 
-        // TODO
-        // cpf não pode ser de um cliente já existente; ⇒ nesse caso deve retornar status 409
+        const isCpfExistent = await connection.query('SELECT id FROM customers WHERE cpf = $1;', [ customer.cpf ] );
+        
+        if(isCpfExistent.rowCount > 0){
+            return res.status(409).send("Cliente já cadastrado."); //conflict
+        }
+
+        await connection.query('INSERT INTO customers (name, phone, cpf, birthday) VALUES ($1, $2, $3, $4);', [ customer.name, customer.phone, customer.cpf, customer.birthday ] );
 
         res.sendStatus(201); //created
     }catch(err){
