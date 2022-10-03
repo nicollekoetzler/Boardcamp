@@ -37,7 +37,6 @@ export async function getCustomerId (req, res) {
 export async function createCustomer (req, res) {
 
     const customer = req.body;
-
     const customerSchema = joi.object({
         name: joi.string().required(),
         phone: joi.string().min(10).max(11).required(),
@@ -60,9 +59,43 @@ export async function createCustomer (req, res) {
 
         await connection.query('INSERT INTO customers (name, phone, cpf, birthday) VALUES ($1, $2, $3, $4);', [ customer.name, customer.phone, customer.cpf, customer.birthday ] );
 
-        res.sendStatus(201); //created
+        res.sendStatus(201); // created
     }catch(err){
         console.log(err)
         res.sendStatus(500); //internal server error
+    }
+}
+
+export async function customersUpdate (req, res) {
+
+    const { id } = req.params;
+
+    const customer = req.body;
+    const customerSchema = joi.object({
+        name: joi.string().required(),
+        phone: joi.string().min(10).max(11).required(),
+        cpf: joi.string().length(11).required(),
+        birthday: joi.date().required()
+    });
+
+    try{
+        const isBodyValid = customerSchema.validate(customer);
+
+        if ( isBodyValid.error ){
+            return res.sendStatus(400); // bad request
+        }
+
+        const isCpfExistent = await connection.query('SELECT id FROM customers WHERE cpf = $1 AND id != $2;', [ customer.cpf, id ] );
+        
+        if(isCpfExistent.rowCount > 0){
+            return res.status(409).send("Cliente já cadastrado."); //conflict
+        }
+
+        await connection.query('UPDATE customers SET name = $1, phone = $2, cpf = $3, birthday = $4 WHERE id = $5;', [customer.name, customer.phone, customer.cpf, customer.birthday, id ]);
+
+        res.sendStatus(200); // ok
+    }catch(err){
+        console.log(err)
+        res.sendStatus(500); // internal server error
     }
 }
