@@ -3,20 +3,20 @@ import joi from 'joi';
 
 export async function getRentals (req, res) {
 
-    try{
+    const {customerId, gameId} = req.query;
 
-        const {customerId, gameId} = req.query;
+    try{
 
         if(customerId){
             const { rows: customerSearch } = await connection.query(
-                `SELECT * FROM customers WHERE id=$1`, [customerId]
+                `SELECT * FROM customers WHERE id LIKE $1`, [`${customerId}%`]
             )
             res.status(200).send(customerSearch);
         }
 
         if(gameId){
             const { rows: gameSearch } = await connection.query(
-                `SELECT * FROM games WHERE id=$1`, [gameId]
+                `SELECT * FROM games WHERE id LIKE $1`, [`${gameId}%`]
             )
             res.status(200).send(gameSearch);
         }
@@ -41,11 +41,13 @@ export async function getRentals (req, res) {
 }
 
 export async function createRental (req, res){
-    try{
-        
+    
+}
 
-    }catch(e){
-        console.log(e);
-        res.status(500).send("Ocorreu um erro ao obter a informação.")
-    }
+export async function concludeRental (req, res) {
+
+}
+
+export async function deleteRental (req, res) {
+
 }

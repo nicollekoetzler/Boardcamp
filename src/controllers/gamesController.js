@@ -3,6 +3,8 @@ import joi from 'joi';
 
 export async function getGames (req, res) {
 
+    const { name } = req.query;
+
     try {
         const { rows: games } = await connection.query(
             'SELECT games.*, categories.name AS "categoryName" FROM games JOIN categories ON games."categoryId" = categories.id;'
@@ -11,11 +13,12 @@ export async function getGames (req, res) {
         //TODO: "Caso seja passado um parâmetro name na query string da requisição,
         // os jogos devem ser filtrados para retornar somente os que começam com a string passada."
 
-        // const name = await req.query.name
-
-        // if(name){
-
-        // }
+        if(name){
+            const { rows: nameSearch } = await connection.query(
+                `SELECT * FROM games WHERE name LIKE $1`, [`${name}%`]
+            )
+            res.status(200).send(nameSearch);
+        }
 
         res.status(200).send(games);
     }catch(err){
