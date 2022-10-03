@@ -80,7 +80,37 @@ export async function createRental (req, res){
 }
 
 export async function concludeRental (req, res) {
+    try{
+        const { id } = req.params;
 
+        const isRentIdExistent = await connection.query('SELECT * FROM rentals WHERE id = $1;', [ id ] );
+        
+        if(isRentIdExistent.rowCount === 0){
+            res.status(404).send("Aluguel não encontrado");
+        }
+
+        const rental = isRentIdExistent.rows[0];
+        if(rental.returnDate){
+            res.status(400).send("Aluguel finalizado")
+        }else{
+            const difference = new Date().getTime() - new Date(rental.rentDate).getTime();
+            const differenceDays = (difference / (24 * 3600 * 1000));
+    
+            let fee = 0;
+            if(differenceDays > rental.daysRented){
+                const extraDays = differenceDays - rental.daysRented;
+                fee = extraDays * rental.originalPrice;
+            }
+        }
+
+        await connection.query('UPDATE rentals SET "returnDate" = NOW(), "fee" = $1 WHERE id = $2',[ fee, id ] );
+
+        res.sendStatus(200);
+
+    }catch(err){
+        console.log(err);
+        res.sendStatus(500);
+    }
 }
 
 export async function deleteRental (req, res) {
