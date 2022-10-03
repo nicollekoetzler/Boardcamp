@@ -16,6 +16,24 @@ export async function getCustomers (req, res) {
     // os clientes devem ser filtrados para retornar somente os com CPF que comecem com a string passada.
 }
 
+export async function getCustomerId (req, res) {
+    const { id } = req.params;
+
+    try{
+        const isIdExistent = await connection.query('SELECT * FROM customers WHERE id = $1;', [ id ] );
+        
+        if(isIdExistent.rowCount === 0){
+            return res.status(404).send("Id não localizado."); // not found
+        }
+        
+        res.send(isIdExistent.rows[0]);
+
+    }catch(err){
+        console.log(err)
+        res.sendStatus(500); //internal server error
+    }
+}
+
 export async function createCustomer (req, res) {
 
     const customer = req.body;
